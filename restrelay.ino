@@ -104,7 +104,6 @@ void setup() {
 
     WiFi.setHostname(WIFI_HOSTNAME);
     ensureConnectedToWiFi();
-    
 
     app.get("/", &handleIndex);
     app.get("/:pin", &handleState);
