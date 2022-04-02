@@ -6,66 +6,89 @@
 WiFiServer server(80);
 Application app;
 
-int pinNumberFromRoute(Request &req) {
-    char buf[10];
-    req.route("pin", buf, 10);
-    int pin = String(buf).toInt();
-    if (pin < 1 || pin > 2) {
-        return -1;
+class Pin {
+public:
+    Pin(pin_size_t number) : number(number) {
     }
-    return pin;
-}
 
-void printPinState(int pin, Response &res) {
-    res.print(digitalRead(pin) ? "1" : "0");
-}
+    Pin(Request &req) {
+        char buf[10];
+        req.route("pin", buf, 10);
+        this->number = String(buf).toInt();
+    }
+
+    bool isValid() const {
+        pin_size_t pin = this->number;
+        return (pin == 1 || pin == 2);
+    }
+
+    void setup() {
+        pinMode(this->number, OUTPUT);
+        this->set(false);
+    }
+
+    bool get() const {
+        return digitalRead(this->number);
+    }
+
+    void set(bool value) {
+        digitalWrite(this->number, value ? HIGH : LOW);
+    }
+
+    void respondState(Response &res) const {
+        res.print(this->get() ? "1" : "0");
+    }
+
+private:
+    pin_size_t number;
+};
 
 void handleIndex(Request &req, Response &res) {
     res.print("hello");
 }
 
 void handleState(Request &req, Response &res) {
-    int pin = pinNumberFromRoute(req);
-    if (pin < 0) {
+    Pin pin(req);
+    if (!pin.isValid()) {
         res.sendStatus(404);
         return;
     }
-    printPinState(pin, res);
+    pin.respondState(res);
 }
 
 void handleOn(Request &req, Response &res) {
-    int pin = pinNumberFromRoute(req);
-    if (pin < 0) {
+    Pin pin(req);
+    if (!pin.isValid()) {
         res.sendStatus(404);
         return;
     }
-    digitalWrite(pin, HIGH);
-    printPinState(pin, res);
+    pin.set(true);
+    pin.respondState(res);
 }
 
 void handleOff(Request &req, Response &res) {
-    int pin = pinNumberFromRoute(req);
-    if (pin < 0) {
+    Pin pin(req);
+    if (!pin.isValid()) {
         res.sendStatus(404);
         return;
     }
-    digitalWrite(pin, LOW);
-    printPinState(pin, res);
+    pin.set(false);
+    pin.respondState(res);
 }
 
 void handleToggle(Request &req, Response &res) {
-    int pin = pinNumberFromRoute(req);
-    if (pin < 0) {
+    Pin pin(req);
+    if (!pin.isValid()) {
         res.sendStatus(404);
         return;
     }
-    digitalWrite(pin, digitalRead(pin) ? LOW : HIGH);
-    printPinState(pin, res);
+    pin.set(!pin.get());
+    pin.respondState(res);
 }
 
 void handlePulse(Request &req, Response &res) {
-    int pin = pinNumberFromRoute(req);
-    if (pin < 0) {
+    Pin pin(req);
+    if (!pin.isValid()) {
         res.sendStatus(404);
         return;
     }
@@ -75,15 +98,10 @@ void handlePulse(Request &req, Response &res) {
     if (d <= 0) {
         d = 250;
     }
-    digitalWrite(pin, HIGH);
+    pin.set(true);
     delay(d);
-    digitalWrite(pin, LOW);
-    printPinState(pin, res);
-}
-
-void setupPin(int pin) {
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW);
+    pin.set(false);
+    pin.respondState(res);
 }
 
 void ensureConnectedToWiFi() {
@@ -99,8 +117,8 @@ void ensureConnectedToWiFi() {
 void setup() {
     Serial.begin(115200);
 
-    setupPin(1);
-    setupPin(2);
+    Pin(1).setup();
+    Pin(2).setup();
 
     WiFi.setHostname(WIFI_HOSTNAME);
     ensureConnectedToWiFi();
