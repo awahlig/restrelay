@@ -43,6 +43,12 @@ private:
     pin_size_t number;
 };
 
+long longFromQuery(Request &req, const char *name) {
+    char buf[16];
+    req.query(name, buf, 16);
+    return atol(buf);
+}
+
 void handleIndex(Request &req, Response &res) {
     res.print("hello");
 }
@@ -92,15 +98,26 @@ void handlePulse(Request &req, Response &res) {
         res.sendStatus(404);
         return;
     }
-    char buf[10];
-    req.query("delay", buf, 10);
-    int d = String(buf).toInt();
-    if (d <= 0) {
-        d = 300;
+    long count = longFromQuery(req, "count");
+    if (count <= 0) {
+        count = 1;
     }
-    pin.set(true);
-    delay(d);
-    pin.set(false);
+    long dur = longFromQuery(req, "duration");
+    if (dur <= 0) {
+        dur = 300;
+    }
+    long ival = longFromQuery(req, "interval");
+    if (ival <= 0) {
+        ival = 1000;
+    }
+    for (long i = 0; i < count; i++) {
+        if (i > 0) {
+            delay(ival);
+        }
+        pin.set(true);
+        delay(dur);
+        pin.set(false);
+    }
     pin.respondState(res);
 }
 
