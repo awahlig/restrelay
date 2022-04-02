@@ -96,7 +96,7 @@ void handlePulse(Request &req, Response &res) {
     req.query("delay", buf, 10);
     int d = String(buf).toInt();
     if (d <= 0) {
-        d = 250;
+        d = 300;
     }
     pin.set(true);
     delay(d);
