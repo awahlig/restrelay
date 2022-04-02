@@ -106,10 +106,17 @@ void handlePulse(Request &req, Response &res) {
 
 void ensureConnectedToWiFi() {
     if (WiFi.status() != WL_CONNECTED) {
+        Pin led(LED_BUILTIN);
+        led.set(false);
+
         while (WiFi.begin(WIFI_SSID, WIFI_PASSWORD) != WL_CONNECTED) {
-            delay(500);
+            led.set(true);
+            delay(300);
+            led.set(false);
             Serial.print(".");
         }
+
+        led.set(true);
         Serial.println(WiFi.localIP());
     }
 }
@@ -117,6 +124,7 @@ void ensureConnectedToWiFi() {
 void setup() {
     Serial.begin(115200);
 
+    Pin(LED_BUILTIN).setup();
     Pin(1).setup();
     Pin(2).setup();
 
