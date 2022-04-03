@@ -11,3 +11,4 @@ Dependencies
 
 * WiFiNINA
 * aWOT
+* protothreads
