@@ -3,21 +3,18 @@
 
 #include <protothreads.h>
 
-class Pin;
+#include "process.h"
 
-class Pulse {
+class Pulse : public Process {
 public:
-    Pulse(Pin& pin, int count, long duration, long interval);
+    Pulse(Pin& pin, long delay, long duration, int count, long interval);
     int run();
 
 private:
-    Pin& pin;
-    pt pts;
-    int count;
     long duration;
+    int count;
     long interval;
     int i;
-    unsigned long sleep;
 };
 
 #endif /* PULSE_H */

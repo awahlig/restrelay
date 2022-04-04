@@ -1,25 +1,24 @@
 #include "pulse.h"
 #include "pin.h"
 
-Pulse::Pulse(Pin& pin, int count, long duration, long interval)
-: pin(pin), count(count), duration(duration), interval(interval) {
-    PT_INIT(&pts);
+Pulse::Pulse(Pin& pin, long delay, long duration, int count, long interval)
+: Process(pin, delay), duration(duration), count(count), interval(interval) {
 }
 
 int Pulse::run() {
     PT_BEGIN(&pts);
 
+    if (delay > 0) {
+        _PT_SLEEP(delay);
+    }
+
     for (i = 0; i < count; i++) {
         if (i > 0) {
-            sleep = millis();
-            PT_WAIT_UNTIL(&pts, millis() - sleep > interval);
+            _PT_SLEEP(interval);
         }
 
         pin.set(true);
-
-        sleep = millis();
-        PT_WAIT_UNTIL(&pts, millis() - sleep > duration);
-
+        _PT_SLEEP(duration);
         pin.set(false);
     }
 

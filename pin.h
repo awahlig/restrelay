@@ -1,31 +1,27 @@
 #ifndef PIN_H
 #define PIN_H
 
-#include <aWOT.h>
-
-#include "pulse.h"
+class Process;
 
 class Pin {
 public:
     static Pin* get(pin_size_t pin);
-    static Pin* fromRoute(Request &req);
     void setup();
     void loop();
     bool get() const;
     void set(bool value);
-    void on();
-    void off();
-    void toggle();
-    void pulseFromQuery(Request& req);
-    void respondState(Response &res) const;
+    void on(long delay);
+    void off(long delay);
+    void toggle(long delay);
+    void pulse(long delay, long duration, int count, long interval);
 
 private:
     Pin(pin_size_t pin);
-    void clearPulse();
+    void clearProcess();
 
 private:
     pin_size_t pin;
-    Pulse* pulse;
+    Process* process;
 };
 
 #endif /* PIN_H */

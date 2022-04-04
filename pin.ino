@@ -1,16 +1,6 @@
 #include "pin.h"
-
-long longFromRoute(Request &req, const char *name) {
-    char buf[16];
-    req.route(name, buf, 16);
-    return atol(buf);
-}
-
-long longFromQuery(Request &req, const char *name) {
-    char buf[16];
-    req.query(name, buf, 16);
-    return atol(buf);
-}
+#include "set.h"
+#include "pulse.h"
 
 Pin* Pin::get(pin_size_t pin) {
     if (pin < 1 || pin > 2) {
@@ -23,19 +13,15 @@ Pin* Pin::get(pin_size_t pin) {
     return &pins[pin - 1];
 }
 
-Pin* Pin::fromRoute(Request &req) {
-    return get(longFromRoute(req, "pin"));
-}
-
 void Pin::setup() {
     pinMode(pin, OUTPUT);
     set(false);
 }
 
 void Pin::loop() {
-    if (pulse) {
-        if (!PT_SCHEDULE(pulse->run())) {
-            clearPulse();
+    if (process) {
+        if (!PT_SCHEDULE(process->run())) {
+            clearProcess();
         }
     }
 }
@@ -48,40 +34,29 @@ void Pin::set(bool value) {
     digitalWrite(pin, (value ? HIGH : LOW));
 }
 
-void Pin::on() {
-    clearPulse();
-    set(true);
+void Pin::on(long delay) {
+    clearProcess();
+    process = new Set(*this, delay, true);
 }
 
-void Pin::off() {
-    clearPulse();
-    set(false);
+void Pin::off(long delay) {
+    clearProcess();
+    process = new Set(*this, delay, false);
 }
 
-void Pin::toggle() {
-    clearPulse();
-    set(!get());
+void Pin::toggle(long delay) {
+    clearProcess();
+    process = new Set(*this, delay, !get());
 }
 
-void Pin::pulseFromQuery(Request& req) {
-    int count = longFromQuery(req, "count");
-    long dur = longFromQuery(req, "duration");
-    long ival = longFromQuery(req, "interval");
-
-    clearPulse();
-    pulse = new Pulse(*this,
-        (count > 0 ? count : 1),
-        (dur > 0 ? dur : 300),
-        (ival > 0 ? ival : 1000));
+void Pin::pulse(long delay, long duration, int count, long interval) {
+    clearProcess();
+    process = new Pulse(*this, delay, duration, count, interval);
 }
 
-void Pin::clearPulse() {
-    delete pulse;
-    pulse = NULL;
-}
-
-void Pin::respondState(Response &res) const {
-    res.print(get() ? "1" : "0");
+void Pin::clearProcess() {
+    delete process;
+    process = NULL;
 }
 
 Pin::Pin(pin_size_t pin) : pin(pin) {
