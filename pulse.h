@@ -1,8 +1,6 @@
 #ifndef PULSE_H
 #define PULSE_H
 
-#include <protothreads.h>
-
 #include "process.h"
 
 class Pulse : public Process {
@@ -11,6 +9,7 @@ public:
     int run();
 
 private:
+    long delay;
     long duration;
     int count;
     long interval;

@@ -2,6 +2,9 @@
 
 #include "network.h"
 #include "constants.h"
+#include "logging.h"
+
+SysLog::Logger netLogger(syslogClient, "net");
 
 Network::Network() {
     PT_INIT(&pts);
@@ -27,20 +30,28 @@ int Network::run() {
 
     for (;;) {
         if (WiFi.status() != WL_CONNECTED) {
-            setLED(false);
+            setLED(true);
+            Serial.print("Connecting to WiFi .");
 
             while (WiFi.begin(WIFI_SSID, WIFI_PASSWORD) != WL_CONNECTED) {
-                setLED(true);
+                setLED(false);
 
                 sleep = millis();
                 PT_WAIT_UNTIL(&pts, millis() - sleep > 300);
 
-                setLED(false);
+                setLED(true);
                 Serial.print(".");
             }
 
-            setLED(true);
+            Serial.println(" OK");
+
+            Serial.print("Local IP: ");
             Serial.println(WiFi.localIP());
+
+            PrintString ip;
+            ip.print(WiFi.localIP());
+
+            netLogger.info("connected to %s as %s", WIFI_SSID, ip.c_str());
         }
 
         PT_YIELD(&pts);

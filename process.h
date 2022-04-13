@@ -1,24 +1,22 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
-#include <protothreads.h>
-
-#define _PT_SLEEP(t) { \
-    sleep = millis(); \
-    PT_WAIT_UNTIL(&pts, millis() - sleep > (t)); }
+#include <pt.h>
 
 class Pin;
 
 class Process {
 public:
-    Process(Pin& pin, long delay);
+    Process(Pin& pin);
+    virtual ~Process();
     virtual int run() = 0;
+    inline Pin& getPin() { return pin; }
+    inline pt* getPT() { return &pts; }
 
 protected:
     Pin& pin;
     pt pts;
-    long delay;
-    unsigned long sleep;
+    unsigned long sleep; // PT_SLEEP()
 };
 
 #endif /* PROCESS_H */

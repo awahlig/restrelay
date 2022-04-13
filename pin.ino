@@ -1,21 +1,37 @@
 #include "pin.h"
 #include "set.h"
 #include "pulse.h"
+#include "trigger.h"
+#include "logging.h"
+
+SysLog::Logger pinLogger(syslogClient, "pin");
 
 Pin* Pin::get(pin_size_t pin) {
-    if (pin < 1 || pin > 2) {
-        return NULL;
+    static Pin pin1(1),
+               pin2(2),
+               pinA1(A1),
+               pinA2(A2);
+
+    switch (pin) {
+        case 1:
+            return &pin1;
+        case 2:
+            return &pin2;
+        case A1:
+            return &pinA1;
+        case A2:
+            return &pinA2;
+
+        default:
+            return NULL;
     }
-    static Pin pins[] = {
-        Pin(1),
-        Pin(2),
-    };
-    return &pins[pin - 1];
 }
 
-void Pin::setup() {
-    pinMode(pin, OUTPUT);
-    set(false);
+void Pin::setup(PinMode mode) {
+    pinMode(pin, mode);
+    if (mode == OUTPUT) {
+        set(false);
+    }
 }
 
 void Pin::loop() {
@@ -31,6 +47,7 @@ bool Pin::get() const {
 }
 
 void Pin::set(bool value) {
+    pinLogger.debug("%d: setting to %d", pin, (value ? 1 : 0));
     digitalWrite(pin, (value ? HIGH : LOW));
 }
 
@@ -52,6 +69,17 @@ void Pin::toggle(long delay) {
 void Pin::pulse(long delay, long duration, int count, long interval) {
     clearProcess();
     process = new Pulse(*this, delay, duration, count, interval);
+}
+
+void Pin::trigger(long duration, Process* child) {
+    clearProcess();
+    process = new Trigger(*this, duration, child);
+}
+
+void Pin::triggerPulse(Pin& dest) {
+    clearProcess();
+    Pulse* child = new Pulse(dest, 200, 300, 1, 1000);
+    process = new Trigger(*this, 100, child);
 }
 
 void Pin::clearProcess() {

@@ -1,6 +1,9 @@
 #include "process.h"
 
-Process::Process(Pin& pin, long delay)
-: pin(pin), delay(delay) {
+Process::Process(Pin& pin)
+: pin(pin) {
     PT_INIT(&pts);
+}
+
+Process::~Process() {
 }

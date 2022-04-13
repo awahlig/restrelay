@@ -2,15 +2,50 @@
 #include <aWOT.h>
 #include <protothreads.h>
 
+#include "constants.h"
 #include "network.h"
 #include "pin.h"
+#include "logging.h"
 
 Network network;
-WiFiServer server(80);
+WiFiServer server(HTTP_PORT);
 Application app;
 
+SysLog::Logger httpLogger(syslogClient, "http");
+
+const char* methodName(Request::MethodType type) {
+    switch (type) {
+        case Request::GET: return "GET";
+        case Request::HEAD: return "HEAD";
+        case Request::POST: return "POST";
+        case Request::PUT: return "PUT";
+        case Request::DELETE: return "DELETE";
+        case Request::PATCH: return "PATCH";
+        case Request::OPTIONS: return "OPTIONS";
+        case Request::ALL: return "ALL";
+        default: return "UNKNOWN";
+    }
+}
+
+void logRequest(Request& req, Response& res) {
+    int status = res.statusSent();
+    const char* query = req.query();
+
+    httpLogger.info("\"%s %s%s%s HTTP/1.%d\" %d",
+                    methodName(req.method()),
+                    req.path(),
+                    (query[0] ? "?" : ""),
+                    query,
+                    req.minorVersion(),
+                    status ? status : 404);
+}
+
 Pin* pinFromRoute(Request& req) {
-    return Pin::get(longFromRoute(req, "pin"));
+    long pin = longFromRoute(req, "pin");
+    if (pin < 1 || pin > 2) {
+        return NULL;
+    }
+    return Pin::get(pin);
 }
 
 long longFromRoute(Request& req, const char* name) {
@@ -89,9 +124,16 @@ void handlePulse(Request& req, Response& res) {
 
 void setup() {
     Serial.begin(115200);
+    syslogClient.setLogLevel(SysLog::INFORMATIONAL);
 
-    Pin::get(1)->setup();
-    Pin::get(2)->setup();
+    Pin::get(1)->setup(OUTPUT);
+    Pin::get(2)->setup(OUTPUT);
+    Pin::get(A1)->setup(INPUT_PULLUP);
+    Pin::get(A2)->setup(INPUT_PULLUP);
+
+    // configure pulse trigger on pins A1 and A2
+    Pin::get(A1)->triggerPulse(*Pin::get(1));
+    Pin::get(A2)->triggerPulse(*Pin::get(2));
 
     network.setup();
 
@@ -101,6 +143,7 @@ void setup() {
     app.post("/:pin/off", &handleOff);
     app.post("/:pin/toggle", &handleToggle);
     app.post("/:pin/pulse", &handlePulse);
+    app.use(&logRequest);
 
     server.begin();
 }
@@ -108,6 +151,8 @@ void setup() {
 void loop() {
     Pin::get(1)->loop();
     Pin::get(2)->loop();
+    Pin::get(A1)->loop();
+    Pin::get(A2)->loop();
 
     network.loop();
 

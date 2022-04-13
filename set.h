@@ -1,8 +1,6 @@
 #ifndef SET_H
 #define SET_H
 
-#include <protothreads.h>
-
 #include "process.h"
 
 class Set : public Process {
@@ -11,6 +9,7 @@ public:
     int run();
 
 private:
+    long delay;
     bool value;
 };
 

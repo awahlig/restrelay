@@ -1,7 +1,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include <protothreads.h>
+#include <pt.h>
 
 class Network {
 public:
