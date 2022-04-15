@@ -43,7 +43,7 @@ void logRequest(Request& req, Response& res) {
 Pin* pinFromRoute(Request& req) {
     long pin = longFromRoute(req, "pin");
     if (pin < 1 || pin > 2) {
-        return NULL;
+        return nullptr;
     }
     return Pin::get(pin);
 }

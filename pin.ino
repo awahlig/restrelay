@@ -23,7 +23,7 @@ Pin* Pin::get(pin_size_t pin) {
             return &pinA2;
 
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -84,7 +84,7 @@ void Pin::triggerPulse(Pin& dest) {
 
 void Pin::clearProcess() {
     delete process;
-    process = NULL;
+    process = nullptr;
 }
 
 Pin::Pin(pin_size_t pin) : pin(pin) {
