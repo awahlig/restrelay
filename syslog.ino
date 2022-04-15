@@ -1,12 +1,12 @@
-#include <WiFiNINA.h>
 #include <stdarg.h>
 
 #include "syslog.h"
 
 namespace SysLog {
 
-Client::Client(String server, uint16_t port, String hostname)
-: server(server),
+Client::Client(UDP& udp, String server, uint16_t port, String hostname)
+: udp(udp),
+  server(server),
   port(port),
   hostname(hostname),
   level(INFORMATIONAL) {
@@ -24,23 +24,26 @@ bool Client::log(uint8_t facility, Severity severity, const char* appname, const
     int priority = (facility << 3) | (severity & 7);
 
     char line[256];
-    snprintf(line, 256, "<%d>1 - %s %s - - - %s",
-             priority, hostname.c_str(), appname, message);
+    int len = snprintf(line, sizeof(line),
+        "<%d>1 - %s %s - - - %s",
+        priority, hostname.c_str(), appname, message);
+    if (len < 0) {
+        return false;
+    }
 
-    return send(line);
+    return send((uint8_t*)line, min(len, sizeof(line) - 1));
 }
 
-bool Client::send(const char* line) {
+bool Client::send(uint8_t* buffer, size_t size) {
     if (server.length() == 0) {
         return true;
     }
 
-    WiFiUDP udp;
     int result = udp.begin(0);
     if (result) {
         result = udp.beginPacket(server.c_str(), port);
         if (result) {
-            udp.write(line);
+            udp.write(buffer, size);
             result = udp.endPacket();
         }
         udp.stop();
