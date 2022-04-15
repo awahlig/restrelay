@@ -27,6 +27,27 @@ Pin* Pin::get(pin_size_t pin) {
     }
 }
 
+Pin* Pin::get(char* name) {
+    if (name[0] != 0 && name[1] == 0) {
+        switch (name[0]) {
+            case '1':
+            case '2':
+                return get(name[0] - '0');
+        }
+    } else if ((name[0] == 'A' || name[0] == 'a') && name[1] != 0 && name[2] == 0) {
+        switch (name[1]) {
+            case '1':
+                return get(A1);
+            case '2':
+                return get(A2);
+        }
+    }
+    return nullptr;
+}
+
+Pin::Pin(pin_size_t pin) : pin(pin) {
+}
+
 void Pin::setup(PinMode mode) {
     pinMode(pin, mode);
     if (mode == OUTPUT) {
@@ -37,7 +58,12 @@ void Pin::setup(PinMode mode) {
 void Pin::loop() {
     if (process) {
         if (!PT_SCHEDULE(process->run())) {
-            clearProcess();
+            setProcess(nullptr);
+        }
+    }
+    if (process_2) {
+        if (!PT_SCHEDULE(process_2->run())) {
+            setProcess_2(nullptr);
         }
     }
 }
@@ -52,40 +78,35 @@ void Pin::set(bool value) {
 }
 
 void Pin::on(long delay) {
-    clearProcess();
-    process = new Set(*this, delay, true);
+    setProcess(new Set(*this, delay, true));
 }
 
 void Pin::off(long delay) {
-    clearProcess();
-    process = new Set(*this, delay, false);
+    setProcess(new Set(*this, delay, false));
 }
 
 void Pin::toggle(long delay) {
-    clearProcess();
-    process = new Set(*this, delay, !get());
+    setProcess(new Set(*this, delay, !get()));
 }
 
 void Pin::pulse(long delay, long duration, int count, long interval) {
-    clearProcess();
-    process = new Pulse(*this, delay, duration, count, interval);
+    setProcess(new Pulse(*this, delay, duration, count, interval));
 }
 
 void Pin::trigger(long duration, Process* child) {
-    clearProcess();
-    process = new Trigger(*this, duration, child);
+    setProcess_2(new Trigger(*this, duration, child));
 }
 
 void Pin::triggerPulse(Pin& dest) {
-    clearProcess();
-    Pulse* child = new Pulse(dest, 200, 300, 1, 1000);
-    process = new Trigger(*this, 100, child);
+    trigger(100, new Pulse(dest, 200, 300, 1, 1000));
 }
 
-void Pin::clearProcess() {
+void Pin::setProcess(Process* p) {
     delete process;
-    process = nullptr;
+    process = p;
 }
 
-Pin::Pin(pin_size_t pin) : pin(pin) {
+void Pin::setProcess_2(Process* p) {
+    delete process_2;
+    process_2 = p;
 }

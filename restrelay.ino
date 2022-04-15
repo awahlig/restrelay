@@ -41,23 +41,19 @@ void logRequest(Request& req, Response& res) {
 }
 
 Pin* pinFromRoute(Request& req) {
-    long pin = longFromRoute(req, "pin");
-    if (pin < 1 || pin > 2) {
-        return nullptr;
-    }
-    return Pin::get(pin);
-}
-
-long longFromRoute(Request& req, const char* name) {
     char buf[16];
-    req.route(name, buf, 16);
-    return atol(buf);
+    if (req.route("pin", buf, 16)) {
+        return Pin::get(buf);
+    }
+    return nullptr;
 }
 
 long longFromQuery(Request& req, const char* name) {
     char buf[16];
-    req.query(name, buf, 16);
-    return atol(buf);
+    if (req.query(name, buf, 16)) {
+        return atol(buf);
+    }
+    return 0;
 }
 
 void handleIndex(Request& req, Response& res) {
