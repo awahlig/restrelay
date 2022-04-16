@@ -9,9 +9,11 @@ class Process {
 public:
     Process(Pin& pin);
     virtual ~Process();
+    int schedule();
+    void reset();
+
+protected:
     virtual int run() = 0;
-    inline Pin& getPin() { return pin; }
-    inline pt* getPT() { return &pts; }
 
 protected:
     Pin& pin;

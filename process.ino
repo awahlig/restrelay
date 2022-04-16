@@ -5,5 +5,13 @@ Process::Process(Pin& pin)
     PT_INIT(&pts);
 }
 
+int Process::schedule() {
+    return PT_SCHEDULE(run());
+}
+
+void Process::reset() {
+    PT_INIT(&pts);
+}
+
 Process::~Process() {
 }

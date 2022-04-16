@@ -56,15 +56,11 @@ void Pin::setup(PinMode mode) {
 }
 
 void Pin::loop() {
-    if (process) {
-        if (!PT_SCHEDULE(process->run())) {
-            setProcess(nullptr);
-        }
+    if (process && !process->schedule()) {
+        setProcess(nullptr);
     }
-    if (process_2) {
-        if (!PT_SCHEDULE(process_2->run())) {
-            setProcess_2(nullptr);
-        }
+    if (process_2 && !process_2->schedule()) {
+        setProcess_2(nullptr);
     }
 }
 

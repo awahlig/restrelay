@@ -27,7 +27,8 @@ int Trigger::run() {
             pinLogger.info("%d was active for %d ms", pin.pinNumber(), duration);
 
             // spawn the child thread and wait until it exits
-            PT_SPAWN(&pts, child->getPT(), child->run());
+            child->reset();
+            PT_WAIT_WHILE(&pts, child->schedule());
         }
     }
 
