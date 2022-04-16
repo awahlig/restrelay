@@ -45,9 +45,6 @@ int Network::run() {
 
             Serial.println(" OK");
 
-            Serial.print("Local IP: ");
-            Serial.println(WiFi.localIP());
-
             PrintString ip;
             ip.print(WiFi.localIP());
 

@@ -25,6 +25,13 @@ bool Client::log(uint8_t facility, Severity severity, const char* appname, const
 
     char line[256];
     int len = snprintf(line, sizeof(line),
+        "[%d] %s %s",
+        severity, appname, message);
+    if (len > 0) {
+        Serial.println(line);
+    }
+
+    len = snprintf(line, sizeof(line),
         "<%d>1 - %s %s - - - %s",
         priority, hostname.c_str(), appname, message);
     if (len < 0) {
