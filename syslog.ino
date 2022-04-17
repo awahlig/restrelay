@@ -4,9 +4,9 @@
 
 namespace SysLog {
 
-Client::Client(UDP& udp, String server, uint16_t port, String hostname)
+Client::Client(UDP& udp, IPAddress ip, uint16_t port, String hostname)
 : udp(udp),
-  server(server),
+  ip(ip),
   port(port),
   hostname(hostname),
   level(INFORMATIONAL) {
@@ -42,13 +42,14 @@ bool Client::log(uint8_t facility, Severity severity, const char* appname, const
 }
 
 bool Client::send(uint8_t* buffer, size_t size) {
-    if (server.length() == 0) {
+    uint32_t addr = ip;
+    if (addr == 0) {
         return true;
     }
 
     int result = udp.begin(0);
     if (result) {
-        result = udp.beginPacket(server.c_str(), port);
+        result = udp.beginPacket(ip, port);
         if (result) {
             udp.write(buffer, size);
             result = udp.endPacket();

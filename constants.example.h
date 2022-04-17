@@ -8,5 +8,5 @@
 // If empty, allows connections from any IP.
 #define HTTP_ALLOWED_IPS {}
 
-#define SYSLOG_HOSTNAME ""
+#define SYSLOG_IP IPAddress()
 #define SYSLOG_PORT 514

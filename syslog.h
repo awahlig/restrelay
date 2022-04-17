@@ -16,7 +16,7 @@ enum Severity {
 
 class Client {
 public:
-    Client(UDP& udp, String server, uint16_t port, String hostname);
+    Client(UDP& udp, IPAddress ip, uint16_t port, String hostname);
 
     void setLogLevel(Severity severity);
     bool log(uint8_t facility, Severity severity, const char* appname, const char* message);
@@ -26,7 +26,7 @@ protected:
 
 private:
     UDP& udp;
-    String server;
+    IPAddress ip;
     uint16_t port;
     String hostname;
     Severity level;
