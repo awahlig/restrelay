@@ -43,10 +43,16 @@ const char* methodName(Request::MethodType type) {
 }
 
 void logRequest(Request& req, Response& res) {
+    WiFiClient* client = static_cast<WiFiClient*>(req.stream());
     int status = res.statusSent();
     const char* query = req.query();
 
-    httpLogger.info("\"%s %s%s%s HTTP/1.%d\" %d",
+    PrintString ip;
+    ip.reserve(16);
+    ip.print(client->remoteIP());
+
+    httpLogger.info("%s \"%s %s%s%s HTTP/1.%d\" %d",
+                    ip.c_str(),
                     methodName(req.method()),
                     req.path(),
                     (query[0] ? "?" : ""),

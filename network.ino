@@ -46,6 +46,7 @@ int Network::run() {
             Serial.println(" OK");
 
             PrintString ip;
+            ip.reserve(16);
             ip.print(WiFi.localIP());
 
             netLogger.info("connected to %s as %s", WIFI_SSID, ip.c_str());
