@@ -13,6 +13,21 @@ Application app;
 
 SysLog::Logger httpLogger(syslogClient, "http");
 
+bool isIPAllowed(IPAddress ip) {
+    static IPAddress allowed[] = HTTP_ALLOWED_IPS;
+    int count = sizeof(allowed) / sizeof(IPAddress);
+
+    if (count == 0) {
+        return true;
+    }
+    for (int i = 0; i < count; i++) {
+        if (ip == allowed[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 const char* methodName(Request::MethodType type) {
     switch (type) {
         case Request::GET: return "GET";
@@ -38,6 +53,14 @@ void logRequest(Request& req, Response& res) {
                     query,
                     req.minorVersion(),
                     status ? status : 404);
+}
+
+void requireAuthorization(Request& req, Response& res) {
+    WiFiClient* client = static_cast<WiFiClient*>(req.stream());
+    if (!res.statusSent() && !isIPAllowed(client->remoteIP())) {
+        res.sendStatus(401); // Unauthorized
+        res.end();
+    }
 }
 
 Pin* pinFromRoute(Request& req) {
@@ -134,12 +157,13 @@ void setup() {
     network.setup();
 
     app.get("/", &handleIndex);
+    app.use(&requireAuthorization);
     app.get("/:pin", &handleState);
     app.post("/:pin/on", &handleOn);
     app.post("/:pin/off", &handleOff);
     app.post("/:pin/toggle", &handleToggle);
     app.post("/:pin/pulse", &handlePulse);
-    app.use(&logRequest);
+    app.finally(&logRequest);
 
     server.begin();
 }

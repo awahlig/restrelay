@@ -4,5 +4,9 @@
 
 #define HTTP_PORT 80
 
+// An array of allowed remote IPs (IPAddress objects).
+// If empty, allows connections from any IP.
+#define HTTP_ALLOWED_IPS {}
+
 #define SYSLOG_HOSTNAME ""
 #define SYSLOG_PORT 514
