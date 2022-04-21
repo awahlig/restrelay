@@ -1,3 +1,5 @@
+#include <pt.h>
+
 #include "trigger.h"
 #include "pin.h"
 

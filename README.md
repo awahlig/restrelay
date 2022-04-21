@@ -9,6 +9,6 @@ I use this to trigger a garage fob from HomeKit.
 Dependencies
 ------------
 
-* WiFiNINA
+* WiFiNINA or Ethernet
 * aWOT
 * protothreads

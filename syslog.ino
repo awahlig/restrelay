@@ -4,12 +4,20 @@
 
 namespace SysLog {
 
-Client::Client(UDP& udp, IPAddress ip, uint16_t port, String hostname)
+Client::Client(UDP& udp, IPAddress ip, uint16_t port)
 : udp(udp),
   ip(ip),
   port(port),
-  hostname(hostname),
+  hostname("arduino"),
   level(INFORMATIONAL) {
+}
+
+void Client::setHostname(const char* name) {
+    hostname = name;
+}
+
+void Client::setHostname(const String& name) {
+    hostname = name;
 }
 
 void Client::setLogLevel(Severity severity) {

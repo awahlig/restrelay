@@ -1,3 +1,5 @@
+#include <pt.h>
+
 #include "pulse.h"
 #include "pin.h"
 #include "ptsleep.h"

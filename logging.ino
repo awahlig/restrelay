@@ -1,10 +1,9 @@
-#include <WiFiNINA.h>
-
 #include "logging.h"
 #include "constants.h"
+#include "network.h"
 
-WiFiUDP udp;
-SysLog::Client syslogClient(udp, SYSLOG_IP, SYSLOG_PORT, WIFI_HOSTNAME);
+NetworkUDP udp;
+SysLog::Client syslogClient(udp, SYSLOG_IP, SYSLOG_PORT);
 
 size_t PrintString::write(const uint8_t* buffer, size_t size) {
     return (concat(buffer, size) ? size : 0);

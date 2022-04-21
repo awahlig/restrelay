@@ -1,6 +1,5 @@
-#include <WiFiNINA.h>
 #include <aWOT.h>
-#include <protothreads.h>
+#include <pt.h>
 
 #include "constants.h"
 #include "network.h"
@@ -8,7 +7,7 @@
 #include "logging.h"
 
 Network network;
-WiFiServer server(HTTP_PORT);
+NetworkServer server(HTTP_PORT);
 Application app;
 
 SysLog::Logger httpLogger(syslogClient, "http");
@@ -43,7 +42,7 @@ const char* methodName(Request::MethodType type) {
 }
 
 void logRequest(Request& req, Response& res) {
-    WiFiClient* client = static_cast<WiFiClient*>(req.stream());
+    NetworkClient *client = static_cast<NetworkClient*>(req.stream());
     int status = res.statusSent();
     const char* query = req.query();
 
@@ -62,7 +61,7 @@ void logRequest(Request& req, Response& res) {
 }
 
 void requireAuthorization(Request& req, Response& res) {
-    WiFiClient* client = static_cast<WiFiClient*>(req.stream());
+    NetworkClient* client = static_cast<NetworkClient*>(req.stream());
     if (!res.statusSent() && !isIPAllowed(client->remoteIP())) {
         res.sendStatus(401); // Unauthorized
         res.end();
@@ -182,7 +181,7 @@ void loop() {
 
     network.loop();
 
-    WiFiClient client = server.available();
+    NetworkClient client = server.available();
     if (client.connected()) {
         app.process(&client);
         client.stop();
