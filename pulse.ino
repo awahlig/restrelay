@@ -15,8 +15,8 @@ int Pulse::run() {
         PT_SLEEP(&pts, sleep, delay);
     }
 
-    pinLogger.info("%d pulsing %d time(s) for %d ms (with %d ms interval)",
-                   pin.pinNumber(), count, duration, interval);
+    pinLogger.info("%s pulsing %d time(s) for %d ms (with %d ms interval)",
+                   pin.name(), count, duration, interval);
 
     for (i = 0; i < count; i++) {
         if (i > 0) {

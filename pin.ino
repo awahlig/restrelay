@@ -27,7 +27,7 @@ Pin* Pin::get(pin_size_t pin) {
     }
 }
 
-Pin* Pin::get(char* name) {
+Pin* Pin::get(const char* name) {
     if (name[0] != 0 && name[1] == 0) {
         switch (name[0]) {
             case '1':
@@ -46,6 +46,22 @@ Pin* Pin::get(char* name) {
 }
 
 Pin::Pin(pin_size_t pin) : pin(pin) {
+}
+
+const char* Pin::name() const {
+    switch (pin) {
+        case 1:
+            return "1";
+        case 2:
+            return "2";
+        case A1:
+            return "A1";
+        case A2:
+            return "A2";
+
+        default:
+            return "?";
+    }
 }
 
 void Pin::setup(PinMode mode) {

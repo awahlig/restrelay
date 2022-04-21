@@ -15,7 +15,7 @@ int Set::run() {
         PT_SLEEP(&pts, sleep, delay);
     }
 
-    pinLogger.info("%d changing to %d", pin.pinNumber(), (value ? 1 : 0));
+    pinLogger.info("%s changing to %d", pin.name(), (value ? 1 : 0));
 
     pin.set(value);
 

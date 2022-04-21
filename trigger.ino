@@ -26,7 +26,7 @@ int Trigger::run() {
 
         // if input remained low for at least <minDuration> ms
         if (duration > minDuration) {
-            pinLogger.info("%d was active for %d ms", pin.pinNumber(), duration);
+            pinLogger.info("%s was active for %d ms", pin.name(), duration);
 
             // spawn the child thread and wait until it exits
             child->reset();

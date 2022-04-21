@@ -10,7 +10,10 @@ class Process;
 class Pin {
 public:
     static Pin* get(pin_size_t pin);
-    static Pin* get(char* name);
+    static Pin* get(const char* name);
+
+    inline pin_size_t number() const { return pin; }
+    const char* name() const;
 
     void setup(PinMode mode);
     void loop();
@@ -25,8 +28,6 @@ public:
 
     void trigger(long duration, Process* child);
     void triggerPulse(Pin& dest);
-
-    inline pin_size_t pinNumber() const { return pin; }
 
 private:
     Pin(pin_size_t pin);
